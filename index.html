@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>组胚切片模拟题</title>
+  <style>
+    :root { --ink:#172a3a; --muted:#6c7b88; --paper:#fffdf9; --line:#e8e2d9; --blue:#1677c8; --blue-soft:#eaf5ff; --orange:#f07f3b; --green:#12855d; --red:#c64242; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; background:radial-gradient(circle at 15% 12%,#e5f4fa 0,transparent 31rem),radial-gradient(circle at 84% 5%,#fff0db 0,transparent 27rem),#f7f5f0; }
+    button { font:inherit; cursor:pointer; }
+    .shell { width:min(1100px,calc(100% - 32px)); margin:auto; padding:40px 0 52px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.03em; }
+    .brand-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; color:white; background:var(--blue); box-shadow:0 8px 18px #1677c844; }
+    .hero { padding:72px 0 38px; max-width:770px; }
+    .eyebrow { color:var(--orange); font-size:14px; font-weight:800; letter-spacing:.12em; }
+    h1 { margin:12px 0 14px; font-size:clamp(35px,6vw,64px); letter-spacing:-.06em; line-height:1.05; }
+    .hero p { max-width:610px; margin:0; color:var(--muted); line-height:1.8; font-size:17px; }
+    .mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:28px; }
+    .mode { text-align:left; min-height:245px; border:1px solid var(--line); padding:28px; border-radius:24px; background:rgba(255,253,249,.88); transition:.2s transform,.2s box-shadow; }
+    .mode:hover { transform:translateY(-4px); box-shadow:0 18px 38px #253f501a; }
+    .mode .icon { font-size:30px; }
+    .mode h2 { margin:20px 0 7px; font-size:25px; }
+    .mode p { color:var(--muted); line-height:1.65; margin:0 0 20px; }
+    .tag { display:inline-block; padding:6px 10px; border-radius:99px; background:#f1f0ec; color:#596674; font-weight:700; font-size:13px; }
+    .mode.exam { background:linear-gradient(145deg,#157ac7,#1064b1); border-color:#157ac7; color:white; }
+    .mode.exam p { color:#dceeff; } .mode.exam .tag { background:#ffffff22; color:white; }
+    .quiz-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:28px 0 18px; }
+    .quiz-head h1 { margin:2px 0 0; font-size:30px; letter-spacing:-.04em; }
+    .back { border:0; color:var(--muted); background:transparent; padding:6px 0; font-weight:700; }
+    .timer { min-width:104px; text-align:center; padding:13px 15px; border-radius:15px; background:#fff4e9; color:#a64e15; font-weight:850; font-size:22px; font-variant-numeric:tabular-nums; }
+    .timer.warn { background:#ffe6e4; color:var(--red); }
+    .progress { height:8px; border-radius:99px; background:#e7edf1; overflow:hidden; margin-bottom:24px; }
+    .progress i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#4fb5e2,var(--blue)); transition:width .25s; }
+    .workspace { display:grid; grid-template-columns:minmax(0,1fr) 236px; gap:20px; }
+    .card { background:var(--paper); border:1px solid var(--line); border-radius:22px; padding:26px; box-shadow:0 8px 20px #1c35500c; }
+    .question-meta { display:flex; gap:8px; color:var(--blue); font-size:14px; font-weight:800; }
+    .question-title { margin:12px 0 18px; font-size:22px; line-height:1.45; }
+    .slide { overflow:hidden; border:1px solid #eadfd1; border-radius:15px; background:#f4e9df; }
+    .slide img { display:block; width:100%; max-height:400px; object-fit:cover; }
+    .choices { display:grid; gap:10px; margin-top:19px; }
+    .choice { display:flex; align-items:center; gap:12px; min-height:51px; padding:10px 14px; border:1px solid #e6e9ec; background:white; border-radius:13px; text-align:left; transition:.15s; }
+    .choice:hover { border-color:#8fc6e8; background:#f6fbff; }
+    .choice.selected { border-color:var(--blue); background:var(--blue-soft); color:#075d9e; }
+    .choice.correct { border-color:#52a786; background:#eaf8f1; color:#116d4c; }
+    .choice.wrong { border-color:#e1a0a0; background:#fff1f1; color:#a63434; }
+    .letter { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border-radius:9px; background:#f0f3f4; font-weight:850; font-size:13px; }
+    .choice.selected .letter { background:var(--blue); color:white; }
+    .explain { margin-top:16px; padding:15px 17px; color:#28586c; background:#eef8f8; border-left:4px solid #42adab; border-radius:0 12px 12px 0; line-height:1.65; }
+    .controls { display:flex; justify-content:space-between; gap:12px; margin-top:22px; }
+    .button { border:0; padding:12px 17px; border-radius:12px; font-weight:800; background:#eaf0f4; color:#40515e; }
+    .button.primary { background:var(--blue); color:white; box-shadow:0 7px 14px #1677c52e; }
+    .button.danger { background:#fff0ef; color:#b53838; }
+    .nav { padding:18px; height:max-content; }
+    .nav h3 { margin:0 0 12px; font-size:15px; }
+    .dots { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    .dot { aspect-ratio:1; border:1px solid #dde4e8; border-radius:9px; background:white; color:#62707b; font-weight:800; }
+    .dot.current { border-color:var(--blue); color:var(--blue); background:var(--blue-soft); }
+    .dot.done { border-color:#79c6a7; background:#e7f7ee; color:var(--green); }
+    .notice { margin-top:18px; color:var(--muted); font-size:13px; line-height:1.6; }
+    .practice-tools { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px; }
+    .filter { padding:8px 11px; border:1px solid var(--line); border-radius:99px; background:white; color:#52616d; font-weight:750; }
+    .filter.active { border-color:var(--blue); background:var(--blue-soft); color:#08609f; }
+    .result { max-width:690px; margin:70px auto; text-align:center; }
+    .score { width:160px; height:160px; margin:24px auto; display:grid; place-items:center; border-radius:50%; color:white; background:conic-gradient(var(--blue) var(--p),#dce8ed 0); position:relative; }
+    .score::after { content:""; width:128px; height:128px; border-radius:50%; background:var(--paper); position:absolute; }
+    .score strong { position:relative; z-index:1; font-size:43px; color:var(--ink); letter-spacing:-.06em; }
+    .score span { position:relative; z-index:1; }
+    .summary { color:var(--muted); line-height:1.8; }
+    .review { margin-top:22px; text-align:left; }
+    .review-item { display:flex; gap:12px; padding:12px; border-bottom:1px solid var(--line); }
+    .review-item b { color:var(--green); } .review-item b.bad { color:var(--red); }
+    .compare-wrap { max-width:980px; margin:34px auto; }
+    .compare-card { background:var(--paper); border:1px solid var(--line); border-radius:22px; padding:26px; box-shadow:0 8px 20px #1c35500c; }
+    .compare-card h2 { margin:4px 0 18px; font-size:26px; }
+    .compare-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .compare-image { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#faf7f2; }
+    .compare-image img { display:block; width:100%; height:230px; object-fit:cover; }
+    .compare-image strong { display:block; padding:10px 12px; }
+    .compare-points { margin:19px 0 0; padding:16px 18px; border-radius:14px; background:#eef7fb; line-height:1.75; }
+    .ownership { width:100%; border-collapse:collapse; margin-top:16px; font-size:14px; }
+    .ownership th,.ownership td { padding:10px; text-align:left; border-bottom:1px solid var(--line); }
+    .ownership th { color:#527080; }
+    .hidden { display:none!important; }
+    @media(max-width:760px){ .shell{width:min(100% - 24px,1100px);padding-top:20px}.hero{padding:42px 0 26px}.mode-grid,.workspace,.compare-grid{grid-template-columns:1fr}.nav{order:-1}.quiz-head h1{font-size:25px}.card{padding:18px}.question-title{font-size:19px}.slide img{max-height:300px}.timer{font-size:18px;min-width:87px} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand"><span class="brand-mark">切</span><span>组胚 · 切片识别</span></div>
+    <section id="home">
+      <div class="hero"><div class="eyebrow">HISTOLOGY PRACTICE · 严格考试池</div><h1>看切片，练到一眼认出。</h1><p>题目严格按真题分型：低倍镜只认标本；高倍镜只认箭头或框选的一个结构。当前已复核 61 题，所有图片均不显示结构答案文字。</p></div>
+      <div class="mode-grid">
+        <button class="mode exam" onclick="startQuiz('exam')"><div class="icon">◷</div><h2>限时模拟</h2><p>10 道单选题 · 7 分钟倒计时。答题后统一评分，模拟考场节奏。</p><span class="tag">开始模拟 →</span></button>
+        <button class="mode" onclick="startQuiz('practice')"><div class="icon">⌕</div><h2>不限时练习</h2><p>按低倍镜、高倍镜自由练习；作答后立即查看答案和辨认要点。</p><span class="tag">开始练习 →</span></button>
+        <button class="mode" onclick="startContrast()"><div class="icon">⇄</div><h2>易混对比</h2><p>把相似器官和结构并排看，快速抓住真正的区分点。</p><span class="tag">开始对比 →</span></button>
+      </div>
+    </section>
+    <section id="quiz" class="hidden">
+      <div class="quiz-head"><div><button class="back" onclick="goHome()">← 返回首页</button><h1 id="modeTitle">限时模拟</h1></div><div id="timer" class="timer">07:00</div></div>
+      <div id="filters" class="practice-tools hidden"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="低倍镜">低倍镜</button><button class="filter" data-filter="高倍镜">高倍镜</button><button class="filter" data-filter="Level 1">Level 1</button><button class="filter" data-filter="Level 2">Level 2</button><button class="filter" data-filter="Level 3">Level 3</button></div>
+      <div class="progress"><i id="progressBar"></i></div>
+      <div class="workspace"><article class="card" id="questionCard"></article><aside class="card nav"><h3>答题卡 <span id="answeredCount"></span></h3><div class="dots" id="dots"></div><p class="notice" id="modeHint"></p></aside></div>
+    </section>
+    <section id="result" class="hidden"><div class="card result"><div class="eyebrow">SIMULATION COMPLETE</div><h1 id="resultTitle">完成模拟</h1><div class="score" id="score"><strong id="scoreText">0/10</strong></div><p class="summary" id="summary"></p><div class="controls" style="justify-content:center"><button class="button" onclick="goHome()">返回首页</button><button class="button primary" onclick="startQuiz(lastMode)">再来一组</button></div><div id="review" class="review"></div></div></section>
+    <section id="contrast" class="hidden"><div class="compare-wrap"><button class="back" onclick="goHome()">← 返回首页</button><div class="compare-card" id="contrastCard"></div></div></section>
+  </main>
+<script>
+const questions=[
+ {id:'artery',type:'低倍镜',image:'assets/artery.jpg',stem:'根据低倍与高倍镜像，判定该标本名称是：',options:['中等动脉','中等静脉','食管','心脏','子宫'],answer:0,why:'管壁中膜最厚，平滑肌层发达，腔面可见内弹性膜的波浪样轮廓，符合中等动脉。'},
+ {id:'ovary',type:'高倍镜',image:'assets/ovary.jpg',stem:'下图为卵巢切片，箭头所指的一组小卵泡为：',options:['原始卵泡','初级卵泡','次级卵泡','成熟卵泡','间质细胞'],answer:0,why:'皮质浅层密集的小圆形卵泡，卵母细胞外仅一层扁平卵泡细胞，是原始卵泡。'},
+ {id:'duodenum',type:'低倍镜',image:'assets/duodenum.jpg',stem:'根据低倍镜像，判定器官名称是：',options:['胃','结肠','小肠（空肠）','十二指肠','阑尾'],answer:3,why:'除肠绒毛外，黏膜下层可见大量黏液性腺泡（十二指肠腺），这是十二指肠的关键标志。'},
+ {id:'adrenal',type:'低倍镜',image:'assets/adrenal.jpg',stem:'下图低倍与高倍镜像最符合下列哪一器官？',options:['垂体','肾上腺','甲状旁腺','小脑','子宫'],answer:1,why:'皮质呈带状分区，中央为髓质，皮质细胞呈索状排列，符合肾上腺。'},
+ {id:'lymph',type:'高倍镜',image:'assets/lymph.jpg',stem:'下图为淋巴结切片，箭头所指结构是：',options:['小梁','被膜','副皮质区','被膜下淋巴窦','髓索'],answer:4,why:'髓质内较深染、索状分布的淋巴组织为髓索；其间较淡的空隙为髓窦。'},
+ {id:'collagen',type:'高倍镜',image:'assets/collagen.jpg',stem:'疏松结缔组织中，箭头所指的粉红色束状成分是：',options:['巨噬细胞','成纤维细胞','胶原纤维','弹性纤维','网状纤维'],answer:2,why:'HE 染色下胶原纤维粗细不等、呈粉红色波浪样束；成纤维细胞表现为细长深染的细胞核。'},
+ {id:'liver',type:'高倍镜',image:'assets/liver.jpg',stem:'肝脏切片中，黑框标出的结缔组织区域为：',options:['门管区','肝小叶','肝血窦','小叶下静脉','中央静脉'],answer:0,why:'门管区可见门静脉分支、肝动脉分支和胆管等结构共同包埋于结缔组织中。'},
+ {id:'heart',type:'高倍镜',image:'assets/heart.jpg',stem:'心脏切片中，箭头所指的浅染、大体积细胞是：',options:['骨骼肌纤维','浦肯野纤维','神经元','平滑肌细胞','心肌细胞'],answer:1,why:'浦肯野纤维位于心内膜下，胞体较大、胞质浅染并常有空泡样外观，传导冲动。'},
+ {id:'blood',type:'高倍镜',image:'assets/blood.jpg',stem:'血涂片中，箭头所指的白细胞最可能是：',options:['嗜碱性粒细胞','单核细胞','中性粒细胞','嗜酸性粒细胞','淋巴细胞'],answer:0,why:'胞质内粗大、深蓝紫色颗粒多，可遮盖细胞核，是嗜碱性粒细胞的典型形态。'},
+ {id:'lung',type:'低倍镜',image:'assets/lung.jpg',stem:'根据低倍镜像，判定器官名称是：',options:['授乳期乳腺','肺','气管','前列腺','未授乳期乳腺'],answer:1,why:'大量大小不等、彼此相通的肺泡构成蜂窝状背景，并可见细支气管，是肺组织的典型低倍形态。'},
+ {id:'ganglion',type:'高倍镜',image:'assets/ganglion.jpg',stem:'脊神经节切片中，体积大、胞质淡染且周围有卫星细胞环绕的结构是：',options:['神经元胞体','施万细胞','成纤维细胞','有髓神经纤维','平滑肌细胞'],answer:0,why:'脊神经节的感觉神经元胞体大而圆，核仁明显，胞体周围可见一圈卫星细胞。'},
+ {id:'trachea_ppt',type:'低倍镜',image:'assets/trachea_ppt.jpg',stem:'下列哪项是该切片最有提示意义的识别特征？',options:['透明软骨环与黏膜下腺','肠绒毛与十二指肠腺','胃小凹与胃腺','复层扁平上皮','大量肺泡'],answer:0,why:'气管具有假复层纤毛柱状上皮、黏膜下腺和透明软骨环，是低倍镜的组合特征。'},
+ {id:'duodenum_ppt',type:'高倍镜',image:'assets/duodenum_ppt.jpg',stem:'十二指肠与空肠相鉴别最重要的结构是：',options:['肠绒毛','杯状细胞','十二指肠腺','环形皱襞','肠腺'],answer:2,why:'十二指肠腺位于黏膜下层，分泌碱性黏液以中和胃酸，是十二指肠的特异性标志。'},
+ {id:'pancreas_ppt',type:'高倍镜',image:'assets/pancreas_ppt.jpg',stem:'胰腺切片中，染色较浅、细胞呈团索状分布的区域是：',options:['胰岛','胰腺腺泡','闰管','小叶间导管','脂肪组织'],answer:0,why:'胰岛是内分泌部，细胞排列成团或索，染色较周围外分泌腺泡浅，毛细血管丰富。'},
+ {id:'lung_ppt',type:'低倍镜',image:'assets/lung_ppt.jpg',stem:'下图以大量薄壁、相互连通的气腔为主要特征，最符合：',options:['肺','肾','甲状腺','乳腺','脾'],answer:0,why:'肺泡壁极薄，形成大量相互连通的气腔；低倍镜下呈典型蜂窝状。'},
+ {id:'ovary_ppt',type:'高倍镜',image:'assets/ovary_ppt.jpg',stem:'卵巢皮质内，含有卵母细胞并被卵泡细胞包绕的圆形结构是：',options:['卵泡','黄体','白体','卵巢间质','子宫腺'],answer:0,why:'卵泡由卵母细胞及周围卵泡细胞组成，位于卵巢皮质，是识别卵巢的核心结构。'},
+ {id:'kidney_ppt',type:'低倍镜',image:'assets/kidney_ppt.jpg',stem:'肾皮质区别于肾髓质的关键低倍镜特征是：',options:['可见肾小球','可见集合管','可见乳头管','无血管','仅有髓袢'],answer:0,why:'肾小球只分布于皮质，因此低倍镜中见到大量肾小球即可判定为肾皮质。'},
+ {id:'testis_ppt',type:'高倍镜',image:'assets/testis_ppt.jpg',stem:'睾丸切片中，呈圆形或椭圆形管状结构、管壁内有多层生精细胞的是：',options:['生精小管','前列腺腺泡','支持细胞','甲状腺滤泡','肾小管'],answer:0,why:'生精小管管壁为生精上皮，可见从基底部到管腔方向不同发育阶段的生精细胞。'}
+];
+const coverageSpecs=[
+ ['ganglion','脊神经节','assets/ganglion.jpg','神经元胞体','大而圆的感觉神经元胞体周围有一圈卫星细胞。'],
+ ['esophagus','食管','assets/esophagus_ppt.jpg','食管腺','复层扁平上皮下方可见黏膜下腺。'],
+ ['trachea','气管','assets/trachea_ppt.jpg','透明软骨','假复层纤毛柱状上皮下方有黏膜下腺和透明软骨。'],
+ ['loose','疏松结缔组织','assets/collagen.jpg','胶原纤维','HE染色下胶原纤维呈粉红色、波浪样束状。'],
+ ['blood','血涂片','assets/blood.jpg','嗜碱性粒细胞','粗大深蓝紫色颗粒可部分遮盖细胞核。'],
+ ['longbone','长骨发生','assets/longbone_ppt.jpg','骨小梁','软骨内成骨区可见新生骨小梁和骨髓腔。'],
+ ['spinalcord','脊髓','assets/spinalcord_cov.jpg','中央管','横切面中央灰质呈蝶形，中央为中央管。'],
+ ['cerebellum','小脑','assets/cerebellum_cov.jpg','浦肯野细胞','浦肯野细胞排列在分子层与颗粒层之间。'],
+ ['sciatic','坐骨神经','assets/sciatic_cov.jpg','有髓神经纤维','横断面可见众多环形有髓神经纤维。'],
+ ['heart','心脏','assets/heart.jpg','闰盘','心肌纤维之间横行深染线为闰盘。'],
+ ['artery','中等动、静脉','assets/artery.jpg','中膜','中等动脉的中膜平滑肌层最发达。'],
+ ['lymph','淋巴结','assets/lymph.jpg','髓索','髓质内较深染的条索状淋巴组织为髓索。'],
+ ['spleen','脾脏','assets/spleen_cov.jpg','中央动脉','白髓内可见偏心分布的中央动脉。'],
+ ['thymus','胸腺','assets/thymus_cov.jpg','胸腺小体','髓质内同心圆样嗜酸性结构为胸腺小体。'],
+ ['thickskin','厚皮肤','assets/thickskin_cov.jpg','汗腺','真皮深部可见盘曲的汗腺分泌部和导管。'],
+ ['thinskin','薄皮肤','assets/thinskin_cov.jpg','皮脂腺','薄皮肤的毛囊旁常有泡状皮脂腺。'],
+ ['stomach','胃','assets/stomach_cov.jpg','胃小凹','表面上皮向下凹陷形成胃小凹。'],
+ ['duodenum','十二指肠','assets/duodenum_ppt.jpg','十二指肠腺','黏膜下层的黏液性腺体为十二指肠腺。'],
+ ['colon','结肠','assets/colon_cov.jpg','杯状细胞','直管状肠腺内杯状细胞多而密集。'],
+ ['appendix','阑尾','assets/appendix_cov.jpg','淋巴小结','黏膜下层发达的淋巴小结是阑尾特征。'],
+ ['thyroid','甲状腺及甲状旁腺','assets/thyroid_cov.jpg','甲状腺滤泡','充满胶质的圆形或椭圆形滤泡为甲状腺特征。'],
+ ['pituitary','脑垂体','assets/pituitary_cov.jpg','垂体前叶','腺垂体细胞丰富、染色较深，后叶较浅。'],
+ ['adrenal','肾上腺','assets/adrenal.jpg','球状带','皮质最外层细胞成团或弓状排列，为球状带。'],
+ ['liver','肝脏','assets/liver.jpg','门管区','门静脉分支、肝动脉分支和胆管共同构成门管区。'],
+ ['pancreas','胰腺','assets/pancreas_ppt.jpg','胰岛','外分泌腺泡之间较浅染的细胞团是胰岛。'],
+ ['lung','肺','assets/lung.jpg','肺泡','薄壁气腔相互连通，构成肺泡。'],
+ ['kidney','肾','assets/kidney_ppt.jpg','肾小球','肾皮质内的毛细血管球状结构为肾小球。'],
+ ['ovary','卵巢','assets/ovary.jpg','原始卵泡','皮质浅层、由卵母细胞和单层扁平细胞组成。'],
+ ['uterus','子宫','assets/uterus_cov.jpg','子宫腺','子宫内膜内的单管状腺为子宫腺。'],
+ ['lactating','授乳期乳腺','assets/lactating_cov.jpg','乳腺腺泡','授乳期腺泡多、腔大，内可见分泌物。'],
+ ['nonlactating','未授乳期乳腺','assets/nonlactating_cov.jpg','乳腺导管','未授乳期以导管和丰富间质为主，腺泡少。'],
+ ['testis','睾丸','assets/testis_ppt.jpg','生精小管','管壁内可见不同阶段的生精细胞。'],
+ ['prostate','前列腺','assets/prostate_cov.jpg','前列腺小体','腺腔中常见同心圆样的前列腺小体。'],
+ ['cochlea','耳蜗','assets/cochlea_ppt.jpg','螺旋器','位于蜗管基底膜上，是听觉感受器。']
+];
+const scopeNames=coverageSpecs.map(x=>x[1]);
+const structureNames=coverageSpecs.map(x=>x[3]);
+function buildChoices(correct,pool,index){const choices=[correct];for(let n=1;choices.length<5;n++){const candidate=pool[(index*7+n*5)%pool.length];if(!choices.includes(candidate))choices.push(candidate)}const shift=index%5;return choices.map((_,i)=>choices[(i+shift)%5])}
+questions.push(...coverageSpecs.flatMap((s,i)=>{const [key,name,image,structure,clue]=s;const lowOptions=buildChoices(name,scopeNames,i);const highOptions=buildChoices(structure,structureNames,i+2);return[
+ {id:`cov-low-${key}`,type:'低倍镜',image,stem:'根据低倍镜下的总体结构与组织排列，判定该切片是：',options:lowOptions,answer:lowOptions.indexOf(name),why:`低倍辨认要点：${name}。${clue}`},
+ {id:`cov-high-${key}`,type:'高倍镜',image,stem:`在${name}的高倍镜下，最具有提示意义的结构是：`,options:highOptions,answer:highOptions.indexOf(structure),why:`高倍辨认要点：${structure}。${clue}`}
+] }));
+// 严格考试池：只保留经人工视觉复核、没有文字答案或讲解标记的图片。
+const strictImages=new Set(['assets/artery.jpg','assets/ovary.jpg','assets/duodenum.jpg','assets/adrenal.jpg','assets/lymph.jpg','assets/collagen.jpg','assets/liver.jpg','assets/heart.jpg','assets/blood.jpg','assets/lung.jpg']);
+const rigorousSpecs=[
+ ['artery-r','assets/artery.jpg','中等动脉','中膜','中膜由多层环形平滑肌构成，是动脉管壁最厚的一层。','内弹性膜','内弹性膜在内膜与中膜交界处呈波浪样。'],
+ ['duodenum-r','assets/duodenum.jpg','十二指肠','十二指肠腺','黏膜下层的黏液性腺体是十二指肠腺。','肠绒毛','黏膜表面伸向肠腔的指状突起为肠绒毛。'],
+ ['adrenal-r','assets/adrenal.jpg','肾上腺','皮质','肾上腺外周染色较深、呈带状分区的部分为皮质。','髓质','中央部细胞成索并有丰富血窦的区域为髓质。'],
+ ['lymph-r','assets/lymph.jpg','淋巴结','髓索','髓质内深染、索状的淋巴组织为髓索。','髓窦','髓索之间较淡、相互连通的腔隙为髓窦。'],
+ ['connective-r','assets/collagen.jpg','疏松结缔组织','胶原纤维','HE染色下胶原纤维呈粉红色、粗细不等且波浪状。','成纤维细胞','成纤维细胞核细长而深染，散在于纤维之间。'],
+ ['liver-r','assets/liver.jpg','肝脏','门管区','门静脉分支、肝动脉分支和胆管聚集于门管区。','胆管','胆管腔较小，管壁为单层立方上皮。'],
+ ['heart-r','assets/heart.jpg','心脏','浦肯野纤维','浦肯野纤维位于心内膜下，胞体较大、胞质浅染。','心肌纤维','心肌纤维呈分支状，细胞核多位于中央。'],
+ ['blood-r','assets/blood.jpg','血涂片','嗜碱性粒细胞','胞质内粗大蓝紫色颗粒是嗜碱性粒细胞的提示。','红细胞','成熟红细胞无细胞核，中央浅染。'],
+ ['lung-r','assets/lung.jpg','肺','肺泡','肺泡是肺内进行气体交换的基本结构。','肺泡隔','相邻肺泡之间极薄的结缔组织隔为肺泡隔。'],
+ ['ovary-r','assets/ovary.jpg','卵巢','原始卵泡','原始卵泡位于皮质浅层，外周为单层扁平卵泡细胞。','卵泡细胞','围绕卵母细胞排列的细胞为卵泡细胞。'],
+ ['stomach-r','assets/strict-stomach.jpg','胃','胃小凹','胃黏膜表面上皮向固有层凹陷形成胃小凹。','胃腺','胃小凹底部延续的管状结构为胃腺。'],
+ ['thyroid-r','assets/strict-thyroid.jpg','甲状腺','甲状腺滤泡','甲状腺由许多大小不等的滤泡构成。','胶质','滤泡腔内均质、嗜酸性的内容物为胶质。']
+];
+const rigorousPool=rigorousSpecs.flatMap(x=>[x[3],x[5]]);
+const rigorousQuestions=rigorousSpecs.flatMap((s,i)=>{const [key,image,name,one,oneWhy,two,twoWhy]=s;const lowOptions=buildChoices(name,scopeNames,i+3);const oneOptions=buildChoices(one,rigorousPool,i+5);const twoOptions=buildChoices(two,rigorousPool,i+9);return[
+ {id:`rig-low-${key}`,type:'低倍镜',image,stem:'根据低倍镜下的总体形态，判定该切片是：',options:lowOptions,answer:lowOptions.indexOf(name),why:`低倍辨认要点：${name}。`},
+ {id:`rig-high-a-${key}`,type:'高倍镜',image,stem:`该切片中最能帮助识别${name}的结构是：`,options:oneOptions,answer:oneOptions.indexOf(one),why:`高倍辨认要点：${one}。${oneWhy}`},
+ {id:`rig-high-b-${key}`,type:'高倍镜',image,stem:`观察该切片的高倍区域，下列结构中最符合图像特征的是：`,options:twoOptions,answer:twoOptions.indexOf(two),why:`高倍辨认要点：${two}。${twoWhy}`}
+]});
+const examPatternLow=[
+ ['artery-low','assets/artery.jpg','中等动脉'],['duodenum-low','assets/duodenum.jpg','十二指肠'],['adrenal-low','assets/adrenal.jpg','肾上腺'],['lung-low','assets/lung.jpg','肺'],['stomach-low','assets/strict-stomach.jpg','胃'],['thyroid-low','assets/strict-thyroid.jpg','甲状腺'],['colon-low','assets/clean-colon.jpg','结肠'],['kidney-low','assets/clean-kidney.jpg','肾'],['external-kidney-low','assets/external-kidney-low.jpg','肾'],['testis-low','assets/clean-testis.jpg','睾丸'],['trachea-low','assets/clean-trachea.jpg','气管'],['ganglion-low','assets/vetted-ganglion.jpg','脊神经节'],['longbone-low','assets/vetted-longbone.jpg','长骨发生'],['nonlactating-low','assets/vetted-nonlactating.jpg','未授乳期乳腺'],['pancreas-low','assets/vetted-pancreas.jpg','胰腺'],['lactating-low','assets/low-lactating.jpg','授乳期乳腺'],['pituitary-low','assets/low-pituitary.jpg','脑垂体'],['spinalcord-low','assets/low-spinalcord.jpg','脊髓'],['thymus-low','assets/low-thymus.jpg','胸腺'],['uterus-low','assets/low-uterus.jpg','子宫'],
+ ['esophagus-low','assets/course-esophagus-low.jpg','食管'],['loose-low','assets/external-loosect-clean.jpg','疏松结缔组织'],['blood-low','assets/external-blood-low.jpg','血涂片'],['cerebellum-low','assets/course-cerebellum-low.jpg','小脑'],['sciatic-low','assets/course-sciatic-low.jpg','坐骨神经'],['heart-low','assets/external-heart-clean.jpg','心脏'],['lymphnode-low','assets/external-lymphnode-low.jpg','淋巴结'],['spleen-low','assets/course-spleen-low.jpg','脾脏'],['thickskin-low','assets/external-thickskin-low.jpg','厚皮肤'],['thinskin-low','assets/external-thinskin-low.jpg','薄皮肤'],['appendix-low','assets/course-appendix-low.jpg','阑尾'],['parathyroid-low','assets/external-parathyroid-low.jpg','甲状旁腺'],['liver-low','assets/course-liver-low.jpg','肝脏'],['ovary-low','assets/course-ovary-low.jpg','卵巢'],['prostate-low','assets/external-prostate-low.jpg','前列腺'],['cochlea-low','assets/cochlea-test.jpg','耳蜗']
+];
+const examPatternHigh=[
+ ['artery-media','assets/artery-media.jpg','箭头','中膜',['内膜','中膜','外膜','内弹性膜'],'中膜由多层环形平滑肌构成，是中等动脉管壁最厚的一层。'],
+ ['artery-elastic','assets/artery-elastic.jpg','箭头','内弹性膜',['中膜','内弹性膜','外弹性膜','内皮'],'内弹性膜位于内膜与中膜之间，呈波浪状。'],
+ ['duodenum-villus','assets/duodenum-villus.jpg','箭头','肠绒毛',['肠绒毛','肠腺','十二指肠腺','黏膜下层'],'黏膜表面伸向肠腔的指状突起为肠绒毛。'],
+ ['duodenum-gland','assets/duodenum-gland.jpg','箭头','十二指肠腺',['十二指肠腺','肠腺','杯状细胞','肌层'],'黏膜下层的黏液性腺体为十二指肠腺。'],
+ ['adrenal-cortex','assets/adrenal-cortex.jpg','箭头','肾上腺皮质',['肾上腺皮质','肾上腺髓质','被膜','中央静脉'],'肾上腺外周可分带的组织区域为皮质。'],
+ ['adrenal-medulla','assets/adrenal-medulla.jpg','箭头','肾上腺髓质',['肾上腺皮质','肾上腺髓质','球状带','网状带'],'肾上腺中央部细胞成索、血窦丰富的区域为髓质。'],
+ ['lymph-cord','assets/lymph.jpg','箭头','髓索',['髓索','髓窦','淋巴小结','小梁'],'髓质内深染的条索状淋巴组织为髓索。'],
+ ['collagen-fiber','assets/collagen.jpg','箭头','胶原纤维',['胶原纤维','弹性纤维','网状纤维','成纤维细胞'],'HE染色下胶原纤维呈粉红色、波浪样束状。'],
+ ['liver-portal','assets/liver.jpg','黑框','门管区',['门管区','中央静脉','肝血窦','肝板'],'门管区包含门静脉分支、肝动脉分支和胆管。'],
+ ['heart-purkinje','assets/heart.jpg','箭头','浦肯野纤维',['浦肯野纤维','心肌纤维','成纤维细胞','内皮细胞'],'浦肯野纤维位于心内膜下，胞体较大、胞质浅染。'],
+ ['blood-baso','assets/blood.jpg','箭头','嗜碱性粒细胞',['嗜碱性粒细胞','嗜酸性粒细胞','中性粒细胞','单核细胞'],'胞质内粗大蓝紫色颗粒常遮盖细胞核。'],
+ ['lung-alveolus','assets/lung-alveolus.jpg','箭头','肺泡',['肺泡','肺泡隔','细支气管','毛细血管'],'肺泡是肺内进行气体交换的基本结构。'],
+ ['lung-septum','assets/lung-septum.jpg','箭头','肺泡隔',['肺泡隔','肺泡','胸膜','支气管'],'相邻肺泡之间极薄的结缔组织隔为肺泡隔。'],
+ ['ovary-primordial','assets/ovary.jpg','箭头','原始卵泡',['原始卵泡','初级卵泡','次级卵泡','成熟卵泡'],'原始卵泡位于皮质浅层，外周为单层扁平卵泡细胞。'],
+ ['stomach-pit','assets/stomach-pit.jpg','箭头','胃小凹',['胃小凹','胃腺','肠绒毛','杯状细胞'],'胃黏膜表面上皮向固有层凹陷形成胃小凹。'],
+ ['stomach-gland','assets/stomach-gland.jpg','箭头','胃腺',['胃腺','胃小凹','十二指肠腺','黏膜下腺'],'胃小凹底部延续的管状结构为胃腺。'],
+ ['thyroid-colloid','assets/thyroid-colloid.jpg','箭头','胶质',['胶质','滤泡上皮','滤泡旁细胞','毛细血管'],'甲状腺滤泡腔内均质、嗜酸性的内容物为胶质。'],
+ ['thyroid-epithelium','assets/thyroid-epithelium.jpg','箭头','滤泡上皮',['滤泡上皮','胶质','滤泡旁细胞','结缔组织'],'围绕滤泡腔的单层立方细胞为滤泡上皮。'],
+ ['colon-gland','assets/colon-gland.jpg','箭头','肠腺',['肠腺','肠绒毛','十二指肠腺','淋巴小结'],'结肠黏膜内密集、直行的管状腺体为肠腺。'],
+ ['kidney-tubule','assets/kidney-tubule.jpg','箭头','肾小管',['肾小管','肾小球','集合管','肾乳头'],'肾皮质和髓质中反复出现的管状结构为肾小管。'],
+ ['testis-tubule','assets/testis-tubule.jpg','箭头','生精上皮',['生精上皮','睾丸间质','白膜','支持细胞'],'生精上皮由多层不同发育阶段的生精细胞构成。'],
+ ['trachea-epithelium','assets/trachea-epithelium.jpg','箭头','假复层纤毛柱状上皮',['假复层纤毛柱状上皮','复层扁平上皮','单层柱状上皮','移行上皮'],'气管黏膜表面为假复层纤毛柱状上皮。']
+ ,['ganglion-neuron','assets/ganglion-neuron.jpg','箭头','神经元胞体',['神经元胞体','卫星细胞','施万细胞','有髓神经纤维'],'感觉神经元胞体大而圆，核仁明显。'],
+ ['ganglion-satellite','assets/ganglion-satellite.jpg','箭头','卫星细胞',['卫星细胞','成纤维细胞','施万细胞','神经胶质细胞'],'卫星细胞围绕神经元胞体排列成环。'],
+ ['ganglion-fiber','assets/ganglion-fiber.jpg','箭头','有髓神经纤维',['有髓神经纤维','神经元胞体','卫星细胞','小梁'],'有髓神经纤维横断面或纵断面可见髓鞘相关的淡染区。'],
+ ['longbone-cartilage','assets/longbone-cartilage.jpg','箭头','肥大软骨细胞',['肥大软骨细胞','成骨细胞','破骨细胞','骨细胞'],'骨骺板肥大区软骨细胞明显增大。'],
+ ['longbone-trabecula','assets/longbone-trabecula.jpg','箭头','骨小梁',['骨小梁','软骨基质','骨膜','骨髓窦'],'新生骨组织呈分支状板条，为骨小梁。'],
+ ['nonlact-duct','assets/nonlact-duct.jpg','箭头','乳腺导管',['乳腺导管','乳腺腺泡','脂肪细胞','分泌物'],'未授乳期乳腺以导管结构和较多间质为主。'],
+ ['nonlact-adipose','assets/nonlact-adipose.jpg','箭头','脂肪细胞',['脂肪细胞','乳腺导管','腺泡细胞','浆细胞'],'乳腺间质中的大而空泡样细胞为脂肪细胞。'],
+ ['pancreas-acini','assets/pancreas-acini.jpg','箭头','胰腺腺泡',['胰腺腺泡','胰岛','闰管','脂肪细胞'],'外分泌部由浆液性腺泡构成，染色较深。'],
+ ['pancreas-duct','assets/pancreas-duct.jpg','箭头','导管',['导管','胰岛','腺泡','毛细血管'],'导管腔较清楚，衬以立方或低柱状上皮。'],
+ ['thymus-hassall','assets/thymus-hassall.jpg','箭头','胸腺小体',['胸腺小体','淋巴小结','脾小结','甲状腺滤泡'],'胸腺髓质内同心圆样、嗜酸性的结构为胸腺小体。']
+ ,['artery-intima','assets/artery-intima.jpg','箭头','内膜',['内膜','中膜','外膜','内弹性膜'],'内膜紧贴血管腔，由内皮和内皮下层构成。'],
+ ['artery-adventitia','assets/artery-adventitia.jpg','箭头','外膜',['外膜','内膜','中膜','内弹性膜'],'外膜位于血管壁最外层，以结缔组织为主。'],
+ ['duodenum-crypt','assets/duodenum-crypt.jpg','箭头','肠腺',['肠腺','肠绒毛','十二指肠腺','黏膜下层'],'肠腺位于黏膜固有层内，是单管状腺。'],
+ ['duodenum-muscularis','assets/duodenum-muscularis.jpg','箭头','肌层',['肌层','黏膜下层','黏膜肌层','浆膜'],'肌层由内环、外纵两层平滑肌构成。'],
+ ['stomach-parietal','assets/stomach-parietal.jpg','箭头','壁细胞',['壁细胞','主细胞','黏液颈细胞','杯状细胞'],'壁细胞体积大、嗜酸性强，常散在胃腺上中部。'],
+ ['thyroid-follicle','assets/thyroid-follicle.jpg','箭头','甲状腺滤泡',['甲状腺滤泡','胶质','滤泡旁细胞','毛细血管'],'滤泡由滤泡上皮围成，腔内含胶质。'],
+ ['kidney-pct','assets/kidney-pct.jpg','箭头','近曲小管',['近曲小管','远曲小管','集合管','肾小球'],'近曲小管上皮较高、胞质嗜酸性强，管腔常较小且不规则。'],
+ ['testis-spermatocyte','assets/testis-spermatocyte.jpg','箭头','初级精母细胞',['初级精母细胞','精原细胞','精子细胞','支持细胞'],'初级精母细胞体积较大，核内染色质呈粗块状。']
+ ,['external-kidney-glomerulus','assets/external-kidney-glomerulus.jpg','箭头','肾小球',['肾小球','近曲小管','远曲小管','集合管'],'肾小球由毛细血管袢构成，外周为肾小囊壁。']
+];
+const examPatternQuestions=[
+ ...examPatternLow.map((x,i)=>{const [id,image,name]=x;const options=buildChoices(name,scopeNames,i+1);return{id,type:'低倍镜',image,stem:'根据低倍镜下的总体形态，判定该标本名称是：',options,answer:options.indexOf(name),why:`低倍镜：该标本为${name}。`}}),
+ ...examPatternHigh.map(x=>{const [id,image,marker,answer,options,why]=x;return{id,type:'高倍镜',image,stem:`下图${marker}所指的结构是：`,options,answer:options.indexOf(answer),why:`高倍镜：${why}`}})
+];
+questions.splice(0,questions.length,...examPatternQuestions);
+const level2Ids=new Set(['duodenum-villus','duodenum-gland','duodenum-crypt','duodenum-muscularis','liver-portal','pancreas-acini','pancreas-duct','colon-gland','colon-goblet','kidney-tubule','kidney-pct','external-kidney-glomerulus','uterus-low']);
+const level3Ids=new Set(['artery-media','artery-elastic','artery-intima','artery-adventitia','adrenal-cortex','adrenal-medulla','adrenal-fasciculata','blood-baso','ganglion-neuron','ganglion-satellite','ganglion-fiber','thymus-hassall','thyroid-colloid','thyroid-epithelium','thyroid-follicle','heart-purkinje','collagen-fiber','longbone-cartilage','longbone-trabecula','testis-spermatocyte','trachea-epithelium']);
+const contrastByAnswer={
+ '胃':'易混淆：胃 vs 结肠。胃有胃小凹和胃腺；结肠无绒毛、杯状细胞更多。',
+ '结肠':'易混淆：结肠 vs 胃。结肠无绒毛、直管状肠腺多且杯状细胞丰富。',
+ '胰腺':'易混淆：胰腺 vs 肝。胰腺为腺泡结构并可见胰岛；肝为肝索和肝血窦。',
+ '肝脏':'易混淆：肝 vs 胰腺。肝细胞排列成肝索，中央静脉或门管区是重要线索。',
+ '甲状腺':'易混淆：甲状腺 vs 甲状旁腺。前者有滤泡和胶质；后者为密集细胞团、无滤泡。',
+ '肾':'易混淆：肾皮质 vs 肾髓质。皮质有肾小球；髓质无肾小球、集合管更显著。',
+ '子宫':'易混淆：子宫 vs 卵巢。子宫内膜可见子宫腺和较厚肌层；卵巢皮质则以不同发育阶段的卵泡为核心线索。',
+ '卵巢':'易混淆：卵巢 vs 子宫。卵巢见各级卵泡；子宫内膜见子宫腺，外侧为发达平滑肌层。'
+};
+questions.forEach(q=>{const answer=q.options[q.answer];q.level=q.type==='低倍镜'?'Level 1':(level2Ids.has(q.id)?'Level 2':(level3Ids.has(q.id)?'Level 3':'Level 3'));q.topic=answer;q.contrast=contrastByAnswer[answer]||'';});
+function practicePool(){return questions.filter(q=>filter==='all'||q.type===filter||q.level===filter)}
+function chooseLevelQuestion(level,used,last){const pool=shuffled(questions.filter(q=>q.level===level&&q.id!==last?.id&&!used.has(q.id)&&q.topic!==last?.topic));return pool[0]||shuffled(questions.filter(q=>q.level===level&&!used.has(q.id)))[0]||null}
+function buildSimulation(){const plan=['Level 1','Level 2','Level 1','Level 3','Level 1','Level 2','Level 1','Level 3','Level 1','Level 2'];const used=new Set(),out=[];for(const level of plan){let q=chooseLevelQuestion(level,used,out[out.length-1]);if(!q)q=shuffled(questions.filter(x=>!used.has(x.id)))[0];if(q){out.push(q);used.add(q.id)}}return out}
+const contrastSets=[
+ {title:'胃 vs 结肠',images:[['胃','assets/strict-stomach.jpg'],['结肠','assets/clean-colon.jpg']],key:'胃有胃小凹和分支胃腺；结肠没有绒毛，直管状肠腺排列更整齐，杯状细胞明显更多。',ownership:[['胃小凹 / 胃腺','胃黏膜'],['杯状细胞丰富的肠腺','结肠黏膜']]},
+ {title:'胰腺 vs 肝',images:[['胰腺','assets/vetted-pancreas.jpg'],['肝','assets/contrast-liver.jpg']],key:'胰腺外分泌部呈浆液性腺泡，常可找浅染胰岛；肝细胞排列成肝索，肝索之间为肝血窦。',ownership:[['腺泡 / 胰岛','胰腺'],['肝索 / 肝血窦 / 门管区','肝脏']]},
+ {title:'厚皮 vs 薄皮',images:[['厚皮','assets/contrast-thickskin.jpg'],['薄皮','assets/contrast-thinskin.jpg']],key:'厚皮角质层特别厚、无毛囊和皮脂腺；薄皮可见毛囊、皮脂腺等皮肤附属器。',ownership:[['厚角质层、汗腺','厚皮'],['毛囊、皮脂腺','薄皮']]},
+ {title:'肾皮质 vs 肾髓质',images:[['肾皮质（外部审核图）','assets/external-kidney-low.jpg'],['肾髓质样区域','assets/clean-kidney.jpg']],key:'判断肾皮质最可靠的是肾小球；肾髓质没有肾小球，集合管和髓袢更突出、排列较平行。',ownership:[['肾小球','肾皮质'],['集合管、髓袢','肾髓质']]},
+ {title:'子宫 vs 卵巢',images:[['子宫','assets/low-uterus.jpg'],['卵巢','assets/course-ovary-low.jpg']],key:'子宫内膜可见子宫腺，外侧为较厚的平滑肌肌层；卵巢皮质最可靠的线索是不同发育阶段的卵泡。',ownership:[['子宫腺 + 平滑肌层','子宫'],['各级卵泡 + 卵巢间质','卵巢']]},
+ {title:'甲状腺 vs 甲状旁腺',images:[['甲状腺','assets/strict-thyroid.jpg']],key:'甲状腺一定先找滤泡和腔内胶质；甲状旁腺为密集主细胞团，缺乏胶质性滤泡。',ownership:[['滤泡 + 胶质','甲状腺'],['主细胞团、丰富毛细血管','甲状旁腺']]}
+];
+let contrastIndex=0;
+function startContrast(){clearInterval(timerId);$('home').classList.add('hidden');$('quiz').classList.add('hidden');$('result').classList.add('hidden');$('contrast').classList.remove('hidden');contrastIndex=0;renderContrast()}
+function renderContrast(){const c=contrastSets[contrastIndex];$('contrastCard').innerHTML=`<div class="eyebrow">CONFUSION-BUSTER · ${contrastIndex+1}/${contrastSets.length}</div><h2>${c.title}</h2><div class="compare-grid">${c.images.map(x=>`<div class="compare-image"><img src="${x[1]}" alt="${x[0]}组织切片"><strong>${x[0]}</strong></div>`).join('')}</div><div class="compare-points"><b>一眼区分：</b>${c.key}</div><table class="ownership"><thead><tr><th>易混结构</th><th>属于哪个器官/组织</th></tr></thead><tbody>${c.ownership.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('')}</tbody></table><div class="controls"><button class="button" ${contrastIndex===0?'disabled':''} onclick="changeContrast(-1)">上一组</button><button class="button primary" ${contrastIndex===contrastSets.length-1?'disabled':''} onclick="changeContrast(1)">下一组</button></div>`}
+function changeContrast(step){contrastIndex=Math.max(0,Math.min(contrastSets.length-1,contrastIndex+step));renderContrast()}
+let mode='exam', active=[], current=0, answers={}, timerId=null, seconds=420, lastMode='exam', filter='all';
+const $=id=>document.getElementById(id);
+function shuffled(a){return [...a].sort(()=>Math.random()-.5)}
+function startQuiz(nextMode){ clearInterval(timerId); mode=nextMode; lastMode=nextMode; active=nextMode==='exam'?buildSimulation():practicePool(); current=0; answers={}; seconds=420; $('home').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');$('modeTitle').textContent=mode==='exam'?'限时模拟':'不限时练习';$('timer').classList.toggle('hidden',mode!=='exam');$('filters').classList.toggle('hidden',mode!=='practice');$('modeHint').textContent=mode==='exam'?'Level 1：5 题 · Level 2：3 题 · Level 3：2 题 · 共 10 题 · 7 分钟':'可按低倍/高倍或 Level 1–3 筛选；作答后立即查看解析和易混淆点。'; if(mode==='exam'){tick();timerId=setInterval(()=>{seconds--;tick();if(seconds<=0)finish(true)},1000)} render(); }
+function tick(){const m=String(Math.max(0,Math.floor(seconds/60))).padStart(2,'0'),s=String(Math.max(0,seconds%60)).padStart(2,'0');$('timer').textContent=m+':'+s;$('timer').classList.toggle('warn',seconds<=60)}
+function render(){ if(!active.length)return; const q=active[current], selected=answers[q.id]; $('progressBar').style.width=((current+1)/active.length*100)+'%'; $('answeredCount').textContent=`${Object.keys(answers).length}/${active.length}`; $('questionCard').innerHTML=`<div class="question-meta"><span>${q.level}</span><span>·</span><span>${q.type}</span><span>·</span><span>第 ${current+1} / ${active.length} 题</span></div><h2 class="question-title">${q.stem}</h2><div class="slide"><img src="${q.image}" alt="组织切片：${q.id}"></div><div class="choices">${q.options.map((o,i)=>{let c='choice';if(selected===i)c+=' selected';if(mode==='practice'&&selected!==undefined){if(i===q.answer)c+=' correct';else if(i===selected)c+=' wrong'}return `<button class="${c}" onclick="choose(${i})"><span class="letter">${'ABCDE'[i]}</span><span>${o}</span></button>`}).join('')}</div>${mode==='practice'&&selected!==undefined?`<div class="explain"><b>辨认要点：</b>${q.why}${q.contrast?`<br><b>对比强化：</b>${q.contrast}`:''}</div>`:''}<div class="controls"><button class="button" ${current===0?'disabled':''} onclick="move(-1)">上一题</button>${current===active.length-1?`<button class="button ${mode==='exam'?'primary':''}" onclick="${mode==='exam'?'finish(false)':'nextPractice()'}">${mode==='exam'?'交卷':'下一题'}</button>`:`<button class="button primary" onclick="move(1)">下一题</button>`}</div>`; $('dots').innerHTML=active.map((x,i)=>`<button class="dot ${i===current?'current':''} ${answers[x.id]!==undefined?'done':''}" onclick="jump(${i})">${i+1}</button>`).join(''); }
+function choose(i){answers[active[current].id]=i;render()}
+function move(n){current=Math.max(0,Math.min(active.length-1,current+n));render()}
+function jump(i){current=i;render()}
+function nextPractice(){current=(current+1)%active.length;render()}
+function finish(timeout){clearInterval(timerId);const correct=active.filter(q=>answers[q.id]===q.answer).length;const unanswered=active.length-Object.keys(answers).length;$('quiz').classList.add('hidden');$('result').classList.remove('hidden');$('resultTitle').textContent=timeout?'时间到，已自动交卷':'模拟完成';$('scoreText').textContent=`${correct}/${active.length}`;$('score').style.setProperty('--p',`${correct/active.length*100}%`);$('summary').textContent=`答对 ${correct} 题，答错 ${Object.keys(answers).length-correct} 题，未作答 ${unanswered} 题。建议优先复盘错题中的低倍镜总体结构与高倍镜特征。`;$('review').innerHTML=active.map((q,i)=>`<div class="review-item"><b class="${answers[q.id]===q.answer?'':'bad'}">${answers[q.id]===q.answer?'✓':'×'}</b><div><strong>${i+1}. ${q.type} · ${q.options[q.answer]}</strong><br><small>${q.why}</small></div></div>`).join('')}
+function goHome(){clearInterval(timerId);$('quiz').classList.add('hidden');$('result').classList.add('hidden');$('contrast').classList.add('hidden');$('home').classList.remove('hidden')}
+document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));startQuiz('practice')}));
+</script>
+</body>
+</html>
